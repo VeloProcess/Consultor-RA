@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Consulta</title>
+    <link rel="icon" type="image/png" href="https://github.com/velobot05/RA-Velobot/blob/main/Imagem%20do%20WhatsApp%20de%202025-07-04%20%C3%A0(s)%2010.52.14_ef4da670.jpg?raw=true">
+    <style>
+        /* ================================================================== */
+        /* ### NOVAS CORES (TEMA RECLAME AQUI) - INÍCIO ### */
+        /* ================================================================== */
+        :root {
+            /* Tons de Verde (Principal) */
+            --cor-verde-principal: #009933;
+            --cor-verde-escuro: #007a29;
+            --cor-verde-claro: #e6f5ee;
+            --cor-balao-bot: #d9f0e6;
+            --cor-verde-hover: #00a338;
+
+            /* Tons de Azul (Detalhes) */
+            --cor-azul-detalhe: #0059a3;
+            --cor-azul-hover: #006bc2;
+
+            /* Cores Neutras */
+            --cor-fundo: #f7f7f7;
+            --cor-container: #ffffff;
+            --cor-caixa-chat: #f0f5f2;
+            --cor-texto-principal: #333333;
+            --cor-texto-secundario: #555555;
+            --cor-borda: #dceddf;
+            --cor-sombra: rgba(0, 0, 0, 0.08);
+            --cor-sombra-hover: rgba(0, 0, 0, 0.12);
+
+            /* Cores de Feedback */
+            --cor-erro: #ff4444;
+            --cor-sucesso: #28a745;
+            --cor-alerta: #ffc107;
+            --cor-info: #17a2b8;
+
+            /* Transições */
+            --transicao-rapida: all 0.15s ease-in-out;
+            --transicao-media: all 0.3s ease-in-out;
+            --transicao-lenta: all 0.5s ease-in-out;
+
+            /* Bordas */
+            --borda-radius-pequeno: 6px;
+            --borda-radius-medio: 12px;
+            --borda-radius-grande: 18px;
+            --borda-radius-circular: 50%;
+
+            /* Espaçamentos */
+            --espacamento-pequeno: 8px;
+            --espacamento-medio: 16px;
+            --espacamento-grande: 24px;
+        }
+
+        body.dark-theme {
+            /* Tons de Verde (Principal) */
+            --cor-verde-principal: #00b33c;
+            --cor-verde-escuro: #00cc44;
+            --cor-verde-claro: #2f3633;
+            --cor-balao-bot: #2a4035;
+            --cor-verde-hover: #00cc44;
+
+            /* Tons de Azul (Detalhes) */
+            --cor-azul-detalhe: #3399ff;
+            --cor-azul-hover: #4da6ff;
+            
+            /* Cores Neutras */
+            --cor-fundo: #1a201d;
+            --cor-container: #242b28;
+            --cor-caixa-chat: #1f2622;
+            --cor-texto-principal: #e0e0e0;
+            --cor-texto-secundario: #b0b0b0;
+            --cor-borda: #3a4a42;
+            --cor-sombra: rgba(0, 0, 0, 0.2);
+            --cor-sombra-hover: rgba(0, 0, 0, 0.3);
+        }
+        /* ================================================================== */
+        /* ### NOVAS CORES (TEMA RECLAME AQUI) - FIM ### */
+        /* ================================================================== */
+
+        /* Reset e Estilos Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--cor-fundo);
+            color: var(--cor-texto-principal);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: var(--espacamento-medio);
+            line-height: 1.6;
+            transition: var(--transicao-media);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Layout Principal */
+        .app-wrapper {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            width: 100%;
+            max-width: 1400px;
+            height: 95vh;
+            gap: var(--espacamento-medio);
+            transition: var(--transicao-media);
+        }
+
+        /* Painéis */
+        .panel {
+            background: var(--cor-container);
+            border-radius: var(--borda-radius-medio);
+            box-shadow: 0 4px 20px var(--cor-sombra);
+            padding: var(--espacamento-grande);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--cor-borda);
+            overflow-y: auto;
+            transition: var(--transicao-media);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--cor-verde-principal);
+            margin-bottom: var(--espacamento-medio);
+            padding-bottom: var(--espacamento-pequeno);
+        }
+
+        .panel h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--cor-verde-principal);
+        }
+
+        /* Botão de Tema */
+        #theme-switcher {
+            font-size: 1.25rem;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: var(--espacamento-pequeno);
+            color: var(--cor-texto-principal);
+            transition: var(--transicao-rapida);
+            border-radius: var(--borda-radius-circular);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #theme-switcher:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-theme #theme-switcher:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Lista de Perguntas Rápidas */
+        #quick-questions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #quick-questions-list li {
+            padding: var(--espacamento-medio);
+            border-radius: var(--borda-radius-pequeno);
+            margin-bottom: var(--espacamento-pequeno);
+            cursor: pointer;
+            transition: var(--transicao-rapida);
+            font-size: 0.875rem;
+            border: 1px solid var(--cor-borda);
+            background-color: var(--cor-container);
+        }
+
+        #quick-questions-list li:hover {
+            background-color: var(--cor-verde-principal);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--cor-sombra-hover);
+        }
+
+        /* Área de Chat */
+        .chat-container {
+            height: 100%;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        .chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: var(--espacamento-medio);
+            background-color: var(--cor-caixa-chat);
+            border-radius: var(--borda-radius-pequeno);
+            transition: var(--transicao-media);
+            scroll-behavior: smooth;
+        }
+
+        /* Barra de rolagem personalizada */
+        .chat-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-box::-webkit-scrollbar-track {
+            background: var(--cor-borda);
+            border-radius: 10px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: var(--cor-verde-principal);
+            border-radius: 10px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb:hover {
+            background: var(--cor-verde-escuro);
+        }
+
+        /* Área de Input */
+        .input-area {
+            display: flex;
+            align-items: center;
+            gap: var(--espacamento-pequeno);
+            margin-top: var(--espacamento-medio);
+            padding: 0 var(--espacamento-grande);
+        }
+
+        #user-input {
+            flex-grow: 1;
+            padding: 14px 20px;
+            border-radius: var(--borda-radius-grande);
+            border: 1px solid var(--cor-borda);
+            background-color: var(--cor-container);
+            color: var(--cor-texto-principal);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transicao-media);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        #user-input:focus {
+            border-color: var(--cor-verde-principal);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-verde-principal) 20%, transparent);
+        }
+
+        #user-input::placeholder {
+            color: var(--cor-texto-secundario);
+            opacity: 0.7;
+        }
+
+        /* Mensagens */
+        .message {
+            position: relative;
+            margin-bottom: var(--espacamento-medio);
+            padding: var(--espacamento-medio);
+            border-radius: var(--borda-radius-grande);
+            max-width: 85%;
+            word-wrap: break-word;
+            transition: var(--transicao-rapida);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .user-msg {
+            background: var(--cor-verde-principal);
+            color: #FFFFFF;
+            margin-left: auto;
+            border-bottom-right-radius: var(--espacamento-pequeno);
+        }
+
+        .bot-msg {
+            background: var(--cor-balao-bot);
+            color: var(--cor-texto-principal);
+            margin-right: auto;
+            border-bottom-left-radius: var(--espacamento-pequeno);
+        }
+
+        .bot-msg img {
+            max-width: 100%;
+            border-radius: var(--borda-radius-pequeno);
+            margin-top: var(--espacamento-pequeno);
+            display: block;
+        }
+
+        /* Ações Rápidas */
+        #quick-actions-container {
+            padding: var(--espacamento-medio) 0;
+            border-top: 1px solid var(--cor-borda);
+            border-bottom: 1px solid var(--cor-borda);
+            margin: var(--espacamento-medio) 0;
+        }
+
+        #quick-actions-container h3 {
+            margin: 0 0 var(--espacamento-pequeno) 0;
+            font-size: 1rem;
+        }
+
+        .quick-actions-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--espacamento-pequeno);
+        }
+
+        button.quick-action {
+            flex-grow: 1;
+            background-color: var(--cor-container);
+            border: 1px solid var(--cor-borda);
+            color: var(--cor-texto-principal);
+            border-radius: var(--borda-radius-pequeno);
+            padding: var(--espacamento-pequeno);
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: var(--transicao-rapida);
+            min-width: 120px;
+        }
+
+        button.quick-action:hover {
+            background-color: var(--cor-verde-claro);
+            border-color: var(--cor-verde-principal);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px var(--cor-sombra-hover);
+        }
+
+        /* Loader */
+        .loader-container {
+            display: flex;
+            margin-bottom: var(--espacamento-medio);
+        }
+
+        .typing-bubble {
+            background: var(--cor-balao-bot);
+            padding: var(--espacamento-medio);
+            border-radius: var(--borda-radius-grande);
+            display: flex;
+            align-items: center;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            margin: 0 2px;
+            background-color: var(--cor-texto-secundario);
+            border-radius: 50%;
+            animation: typing-animation 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing-animation {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-6px);
+            }
+        }
+
+        /* Botão de Copiar */
+        .copy-btn {
+            position: absolute;
+            top: var(--espacamento-pequeno);
+            right: var(--espacamento-pequeno);
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--cor-texto-principal);
+            opacity: 0.3;
+            transition: var(--transicao-rapida);
+            width: 30px;
+            height: 30px;
+            border-radius: var(--borda-radius-circular);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bot-msg:hover .copy-btn {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Estilos para a Resposta Formatada */
+        .bot-msg .response-list {
+            list-style: none;
+            padding: 0;
+            margin: var(--espacamento-pequeno) 0 0 0;
+        }
+
+        .bot-msg .response-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--cor-borda);
+            font-size: 0.875rem;
+            transition: var(--transicao-rapida);
+        }
+
+        .bot-msg .response-list li:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        body.dark-theme .bot-msg .response-list li:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .bot-msg .response-list li:last-child {
+            border-bottom: none;
+        }
+
+        .bot-msg .response-list li strong {
+            color: var(--cor-verde-escuro);
+            font-weight: 600;
+        }
+
+        body.dark-theme .bot-msg .response-list li strong {
+            color: var(--cor-verde-principal);
+        }
+
+        /* Overlays */
+        #identificacao-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 50, 100, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            transition: var(--transicao-media);
+        }
+
+        #identificacao-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #identificacao-box {
+            background: var(--cor-container);
+            padding: var(--espacamento-grande);
+            border-radius: var(--borda-radius-medio);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            transform: translateY(0);
+            transition: var(--transicao-media);
+        }
+
+        #identificacao-overlay.hidden #identificacao-box {
+            transform: translateY(-20px);
+        }
+
+        #alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 20, 40, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            transition: var(--transicao-media);
+        }
+
+        #alert-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #alert-box {
+            background: var(--cor-container);
+            padding: var(--espacamento-grande);
+            border-radius: var(--borda-radius-medio);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 550px;
+            border-top: 5px solid var(--cor-alerta);
+            transform: scale(1);
+            transition: var(--transicao-media);
+        }
+
+        #alert-overlay.hidden #alert-box {
+            transform: scale(0.95);
+        }
+
+        /* Notícias */
+        .news-item {
+            padding: var(--espacamento-medio);
+            margin-bottom: var(--espacamento-medio);
+            background: var(--cor-container);
+            border-radius: var(--borda-radius-pequeno);
+            border-left: 4px solid var(--cor-borda);
+            transition: var(--transicao-rapida);
+        }
+
+        .news-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--cor-sombra);
+        }
+
+        .news-item.critical-alert {
+            border-left-color: var(--cor-alerta);
+            background-color: color-mix(in srgb, var(--cor-alerta) 5%, var(--cor-container));
+        }
+
+        .news-item h2 {
+            font-size: 1.1rem;
+            margin-bottom: var(--espacamento-pequeno);
+            color: var(--cor-texto-principal);
+        }
+
+        .news-item small {
+            display: block;
+            margin-bottom: var(--espacamento-pequeno);
+            color: var(--cor-texto-secundario);
+            font-size: 0.75rem;
+        }
+
+        .news-item p {
+            font-size: 0.875rem;
+            color: var(--cor-texto-principal);
+            line-height: 1.5;
+        }
+
+        /* Botões */
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            background-color: var(--cor-verde-principal);
+            color: white;
+            border-radius: var(--borda-radius-pequeno);
+            cursor: pointer;
+            transition: var(--transicao-rapida);
+        }
+
+        button:hover {
+            background-color: var(--cor-verde-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--cor-sombra-hover);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Inputs */
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid var(--cor-borda);
+            border-radius: var(--borda-radius-pequeno);
+            box-sizing: border-box;
+            background-color: var(--cor-container);
+            color: var(--cor-texto-principal);
+            transition: var(--transicao-rapida);
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus {
+            border-color: var(--cor-verde-principal);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-verde-principal) 20%, transparent);
+            outline: none;
+        }
+
+        /* Textos */
+        h4 {
+            margin: var(--espacamento-medio) 0 var(--espacamento-pequeno);
+            color: var(--cor-verde-principal);
+            font-size: 1rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--cor-borda);
+            margin: var(--espacamento-medio) 0;
+        }
+
+        /* Responsividade */
+        @media (max-width: 1200px) {
+            .app-wrapper {
+                grid-template-columns: 250px 1fr 250px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .app-wrapper {
+                grid-template-columns: 1fr;
+                height: auto;
+                min-height: 95vh;
+            }
+            
+            .panel {
+                height: auto;
+                max-height: 400px;
+            }
+            
+            .chat-container {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: var(--espacamento-pequeno);
+            }
+            
+            .panel {
+                padding: var(--espacamento-medio);
+            }
+            
+            .input-area {
+                padding: 0 var(--espacamento-medio);
+            }
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .message {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- O restante do HTML permanece o mesmo -->
+    <div id="identificacao-overlay">
+        <div id="identificacao-box">
+            <h2>Bem-vindo(a) ao Painel</h2>
+            <p>Por favor, identifique-se para continuar.</p>
+            <form id="identificacao-form">
+                <div class="input-group" style="text-align: left; margin-bottom: 15px;">
+                    <label for="nome-input" style="display: block; margin-bottom: 5px; font-weight: bold;">Nome Completo</label>
+                    <input type="text" id="nome-input" required style="width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;">
+                </div>
+                <div class="input-group" style="text-align: left; margin-bottom: 15px;">
+                    <label for="email-input" style="display: block; margin-bottom: 5px; font-weight: bold;">E-mail Corporativo</label>
+                    <input type="email" id="email-input" required style="width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;">
+                </div>
+                <button type="submit" id="identificacao-submit" style="padding: 12px 20px; width: 100%; font-size: 16px; font-weight: bold; border: none; background-color: var(--cor-azul-medio); color: white; border-radius: 8px; cursor: pointer; margin-top: 10px;">Entrar</button>
+            </form>
+            <p id="identificacao-error" style="display:none; color: #ff4d4d; margin-top: 15px;">Acesso permitido apenas para e-mails @velotax.com.br!</p>
+        </div>
+    </div>
+    <div id="alert-overlay" class="hidden">
+        <div id="alert-box">
+            <h2>⚠️ Comunicado Importante ⚠️</h2>
+            <div id="alert-content"></div>
+            <button id="alert-close-btn">Eu li e estou Ciente</button>
+        </div>
+    </div>
+    <div class="app-wrapper">
+        <div id="sidebar" class="panel">
+            <div class="panel-header"><h2>Olá, Reclame Aqui!!</h2></div>
+            <ul id="quick-questions-list">
+            </ul>
+            <br><h4>Clique na prancheta 📋 ao lado da resposta do bot para copiar...</h4><br>
+        </div>
+        <div class="chat-container panel">
+            <div class="panel-header">
+                <h2 style="text-align: center; flex-grow: 1;">Assistente de Consulta</h2>
+                <button id="theme-switcher" title="Alterar tema">☀️</button>
+            </div>
+            <div class="chat-box" id="chat-box"></div>
+            <div id="quick-actions-container">
+                <h2 style="text-align: center; flex-grow: 1;"> Coloque o CPF aqui!</h2>
+                <div class="quick-actions-grid">
+                </div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Digite o CPF/CNPJ para consulta...">
+            </div>
+        </div>
+        <div id="news-panel" class="panel">
+            <div class="panel-header"><h2>Notícias da Semana</h2></div>
+            <div id="news-list">
+                <div class="news-item critical-alert">
+                    <h2>Desligamos a Antecipação novamente, pessoal</h2>
+                    <small>Publicado em: 03/07/2025</small>
+                    <p>Devemos encaminhar ao N2 100% dos casos em que o cliente solicita a chave PIX antes de quitar o pagamento, mesmo explicando a regra contratual. Não retemos chaves contra a vontade do cliente.
+Reclamações no Bacen por falhas nesse processo são inaceitáveis.
+Se o cliente já pagou ou não contratou, resolvemos internamente (sem N2). Dificuldades na portabilidade exigem suporte passo a passo ou acionar a equipe de Produtos para exclusão, se necessário, mais informações detalhadas estão no grupo de notícias!!                        
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const identificacaoOverlay = document.getElementById('identificacao-overlay');
+        const identificacaoForm = document.getElementById('identificacao-form');
+        const appWrapper = document.querySelector('.app-wrapper');
+
+        function verificarIdentificacao() {
+            const DOMINIO_PERMITIDO = "@velotax.com.br";
+            const umDiaEmMs = 24 * 60 * 60 * 1000;
+            let dadosSalvos = null;
+            try {
+                const dadosSalvosString = localStorage.getItem('dadosAtendenteChatbot');
+                if(dadosSalvosString) dadosSalvos = JSON.parse(dadosSalvosString);
+            } catch(e) { localStorage.removeItem('dadosAtendenteChatbot'); }
+            
+            if (!dadosSalvos || (Date.now() - dadosSalvos.timestamp > umDiaEmMs) || !dadosSalvos.email.endsWith(DOMINIO_PERMITIDO)) {
+                identificacaoOverlay.style.display = 'flex';
+                appWrapper.style.visibility = 'hidden';
+            } else {
+                identificacaoOverlay.style.display = 'none';
+                appWrapper.style.visibility = 'visible';
+                iniciarBot(dadosSalvos);
+            }
+        }
+
+        identificacaoForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const DOMINIO_PERMITIDO = "@velotax.com.br";
+            const nome = document.getElementById('nome-input').value.trim();
+            const email = document.getElementById('email-input').value.trim().toLowerCase();
+            const errorMsg = document.getElementById('identificacao-error');
+
+            if (nome && email && email.endsWith(DOMINIO_PERMITIDO)) {
+                const dadosAtendente = { nome, email, timestamp: Date.now() };
+                localStorage.setItem('dadosAtendenteChatbot', JSON.stringify(dadosAtendente));
+                identificacaoOverlay.style.display = 'none';
+                appWrapper.style.visibility = 'visible';
+                iniciarBot(dadosAtendente);
+            } else {
+                errorMsg.style.display = 'block';
+            }
+        });
+
+        function verificarAlertasCriticos() {
+            const alertOverlay = document.getElementById('alert-overlay');
+            const alertContent = document.getElementById('alert-content');
+            const alertCloseBtn = document.getElementById('alert-close-btn');
+            const criticalAlertItem = document.querySelector('.news-item.critical-alert');
+            if (criticalAlertItem) {
+                const alertHtml = criticalAlertItem.innerHTML;
+                const foiVisto = sessionStorage.getItem('alertaVisto');
+                if (foiVisto !== alertHtml) {
+                    alertContent.innerHTML = alertHtml;
+                    alertOverlay.classList.remove('hidden');
+                }
+                alertCloseBtn.onclick = () => {
+                    alertOverlay.classList.add('hidden');
+                    sessionStorage.setItem('alertaVisto', alertHtml);
+                };
+            }
+        }
+
+        function iniciarBot(dadosAtendente) {
+            const chatBox = document.getElementById('chat-box');
+            const userInput = document.getElementById('user-input');
+            const themeSwitcher = document.getElementById('theme-switcher');
+            const body = document.body;
+
+            const CONSULTA_API_URL = "https://script.google.com/macros/s/AKfycbz_-kuhCawDMkJ88KDvXGpHuP9a4y1XrazSxIcStCwwoRb7KhE__P9eH9p7mBK7RzP5/exec";
+
+            function toggleLoader(show) {
+                const existingLoader = document.getElementById('loader');
+                if (show && !existingLoader) {
+                    const loaderElement = document.createElement('div');
+                    loaderElement.id = 'loader';
+                    loaderElement.classList.add('loader-container');
+                    loaderElement.innerHTML = `<div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+                    chatBox.appendChild(loaderElement);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                } else if (!show && existingLoader) {
+                    existingLoader.remove();
+                }
+            }
+            
+            function addMessage(message, sender) {
+                const messageContainer = document.createElement('div');
+                messageContainer.classList.add('message', sender === 'user' ? 'user-msg' : 'bot-msg');
+                
+                // Adiciona o botão de copiar apenas para mensagens do bot que são bem-sucedidas
+                if (sender === 'bot' && (message.includes('response-list') || message.includes('Ocorrência'))) {
+                    messageContainer.innerHTML = message + '<button class="copy-btn" title="Copiar resposta">📋</button>';
+                } else {
+                    messageContainer.innerHTML = message.replace(/\n/g, '<br>');
+                }
+
+                chatBox.appendChild(messageContainer);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+            
+            async function buscarDadosPorCpfCnpj(cpfCnpj) {
+                if (!cpfCnpj.trim()) return;
+                toggleLoader(true);
+                
+                if (!CONSULTA_API_URL || CONSULTA_API_URL.includes("COLE_A_URL")) {
+                    toggleLoader(false);
+                    addMessage("ERRO DE CONFIGURAÇÃO: A URL de consulta não foi definida no código.", 'bot');
+                    return;
+                }
+
+                try {
+                    const url = `${CONSULTA_API_URL}?cpf=${encodeURIComponent(cpfCnpj)}`;
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`Erro de rede! Status: ${response.status}`);
+                    const data = await response.json();
+                    toggleLoader(false);
+                    
+                    // ### INÍCIO DA MUDANÇA PARA MÚLTIPLOS RESULTADOS ###
+                    if (data.status === 'sucesso' && data.dados && data.dados.length > 0) {
+                        // data.dados agora é um array de objetos
+                        let resultadoFinalHtml = `<strong>✅ ${data.dados.length} resultado(s) encontrado(s) para o documento:</strong>`;
+
+                        data.dados.forEach((ocorrencia, index) => {
+                            // Adiciona um separador e um título para cada ocorrência
+                            resultadoFinalHtml += `<hr style="border-top: 1px solid var(--cor-borda); margin: 20px 0;"><h4>Ocorrência ${index + 1}</h4>`;
+
+                            const camposParaExibir = [
+                                { rotulo: 'Id', chaveApi: 'Id' }, { rotulo: 'HugMe', chaveApi: 'HugMe' },
+                                { rotulo: 'Origem Id', chaveApi: 'OrigemId' }, { rotulo: 'Origem', chaveApi: 'Origem' },
+                                { rotulo: 'Data Reclamação', chaveApi: 'Data Reclamação' }, { rotulo: 'Status', chaveApi: 'Status' },
+                                { rotulo: 'Hugme Status', chaveApi: 'HugmeStatus' }, { rotulo: 'RA', chaveApi: 'RA' },
+                                { rotulo: 'Nome', chaveApi: 'Nome' }, { rotulo: 'CPF/CNPJ', chaveApi: 'CPF/CNPJ' },
+                                { rotulo: 'Seu problema foi resolvido?', chaveApi: 'Seu problema foi resolvido?' },
+                                { rotulo: 'Voltaria a fazer negócio?', chaveApi: 'Voltaria a fazer negócio?' }, { rotulo: 'Nota', chaveApi: 'Nota' },
+                                { rotulo: 'Moderações neste ticket', chaveApi: 'Moderações neste ticket' },
+                                { rotulo: 'Data de Desativação RA', chaveApi: 'Data de Desativação RA' },
+                                { rotulo: 'Motivo de Desativação RA', chaveApi: 'Motivo de Desativação RA' },
+                                { rotulo: 'Avaliações desconsideradas RA', chaveApi: 'Avaliações desconsideradas RA' },
+                                { rotulo: 'Moderação status', chaveApi: 'Moderação status' }, { rotulo: 'Data Avaliacao', chaveApi: 'Data Avaliacao' }
+                            ];
+
+                            let listaHtml = '<ul class="response-list">';
+                            camposParaExibir.forEach(campo => {
+                                const valor = ocorrencia[campo.chaveApi]; // Usa 'ocorrencia' para pegar os dados do registro atual
+                                if (valor !== undefined && valor !== null && valor !== '') {
+                                    listaHtml += `<li><strong>${campo.rotulo}:</strong> ${valor}</li>`;
+                                }
+                            });
+                            listaHtml += '</ul>';
+                            
+                            resultadoFinalHtml += listaHtml;
+                        });
+                        
+                        addMessage(resultadoFinalHtml, 'bot');
+                        // ### FIM DA MUDANÇA ###
+
+                    } else {
+                        addMessage(`⚠️ ${data.mensagem || 'Nenhum dado encontrado para o documento informado.'}`, 'bot');
+                    }
+                } catch (error) {
+                    toggleLoader(false);
+                    console.error("Erro ao buscar dados:", error);
+                    addMessage("Erro de conexão com o sistema de consulta. Verifique o console (F12).", 'bot');
+                }
+            }
+
+            function handleBusca(texto) {
+                if (!texto || !texto.trim()) return;
+                addMessage(texto, 'user');
+                buscarDadosPorCpfCnpj(texto);
+                if (userInput) userInput.value = '';
+            }
+
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); handleBusca(userInput.value); }
+            });
+            
+            chatBox.addEventListener('click', (e) => {
+                if (e.target && e.target.classList.contains('copy-btn')) {
+                    const botMsgElement = e.target.closest('.bot-msg');
+                    if (botMsgElement) {
+                        const titulos = botMsgElement.querySelectorAll('h4');
+                        const listas = botMsgElement.querySelectorAll('.response-list');
+                        let textToCopy = '';
+
+                        listas.forEach((lista, index) => {
+                            if (titulos[index]) {
+                                textToCopy += titulos[index].innerText.trim() + '\n------------------------\n';
+                            }
+                            const listItems = lista.querySelectorAll('li');
+                            listItems.forEach(item => {
+                                textToCopy += item.innerText.replace(':', ': ') + '\n';
+                            });
+                            textToCopy += '\n'; 
+                        });
+
+                        const tempTextArea = document.createElement('textarea');
+                        tempTextArea.value = textToCopy.trim();
+                        document.body.appendChild(tempTextArea);
+                        tempTextArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempTextArea);
+
+                        e.target.innerText = '✅';
+                        setTimeout(() => { e.target.innerText = '📋'; }, 1500);
+                    }
+                }
+            });
+
+            themeSwitcher.addEventListener('click', () => {
+                body.classList.toggle('dark-theme');
+                const isDark = body.classList.contains('dark-theme');
+                themeSwitcher.innerHTML = isDark ? '🌙' : '☀️';
+                localStorage.setItem('theme', isDark ? 'dark-theme' : 'light-theme');
+            });
+            
+            function setInitialTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark-theme') {
+                    body.classList.add('dark-theme');
+                    themeSwitcher.innerHTML = '🌙';
+                } else {
+                    body.classList.remove('dark-theme');
+                    themeSwitcher.innerHTML = '☀️';
+                }
+            }
+            
+            const primeiroNome = dadosAtendente.nome.split(' ')[0];
+            const hora = new Date().getHours();
+            let saudacao = (hora >= 5 && hora < 12) ? 'Bom dia' : (hora >= 12 && hora < 18) ? 'Boa tarde' : 'Boa noite';
+            addMessage(`${saudacao}, ${primeiroNome}! Bem-vindo(a) ao painel de consulta. Digite um CPF/CNPJ abaixo para começar.`, 'bot');
+            
+            setInitialTheme();
+            verificarAlertasCriticos();
+        }
+
+        verificarIdentificacao();
+    });
+    </script>
+</body>
+</html>
