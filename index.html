@@ -172,27 +172,58 @@
         .bot-msg:hover .copy-btn { opacity: 1; }
         .copy-btn:active { transform: scale(0.9); }
         
-        /* ### NOVOS ESTILOS PARA A RESPOSTA FORMATADA ### */
-        .bot-msg .response-list {
-            list-style: none;
-            padding: 0;
-            margin: 10px 0 0 0;
+        /* ================================================================== */
+        /* ### NOVOS ESTILOS PARA A RESPOSTA BONITA ### */
+        /* ================================================================== */
+        .response-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
         }
-        .bot-msg .response-list li {
-            padding: 6px 0;
-            border-bottom: 1px solid var(--cor-borda);
-            font-size: 14px;
+        .grid-item {
+            background-color: color-mix(in srgb, var(--cor-balao-bot) 50%, transparent);
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid var(--cor-verde-principal);
         }
-        .bot-msg .response-list li:last-child {
-            border-bottom: none;
+        .grid-label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--cor-azul-detalhe);
+            margin-bottom: 4px;
+            text-transform: uppercase;
         }
-        .bot-msg .response-list li strong {
-            color: var(--cor-verde-escuro);
+        .grid-value {
+            font-size: 15px;
         }
-        body.dark-theme .bot-msg .response-list li strong {
-             color: var(--cor-verde-principal);
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            text-transform: capitalize;
         }
+        .status-badge.status-finalizada, .status-badge.status-resolvido { background-color: #28a745; }
+        .status-badge.status-em-atendimento, .status-badge.status-em-andamento { background-color: #ffc107; color: #333; }
+        .status-badge.status-não-resolvido, .status-badge.status-pendente { background-color: #dc3545; }
+        .status-badge { background-color: #6c757d; } /* Cor padrão */
+
+        .responsavel-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .responsavel-tag svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+        /* ================================================================== */
         /* ### FIM DOS NOVOS ESTILOS ### */
+        /* ================================================================== */
 
         #identificacao-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -369,7 +400,7 @@ Se o cliente já pagou ou não contratou, resolvemos internamente (sem N2). Difi
                 const messageContainer = document.createElement('div');
                 messageContainer.classList.add('message', sender === 'user' ? 'user-msg' : 'bot-msg');
                 
-                if (sender === 'bot' && (message.includes('response-list') || message.includes('Ocorrência'))) {
+                if (sender === 'bot' && (message.includes('response-grid') || message.includes('Ocorrência'))) {
                     messageContainer.innerHTML = message + '<button class="copy-btn" title="Copiar resposta">📋</button>';
                 } else {
                     messageContainer.innerHTML = message.replace(/\n/g, '<br>');
@@ -377,6 +408,30 @@ Se o cliente já pagou ou não contratou, resolvemos internamente (sem N2). Difi
 
                 chatBox.appendChild(messageContainer);
                 chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            // ### FUNÇÃO PARA FORMATAR DATAS ###
+            function formatarData(dataString) {
+                if (!dataString) return 'N/A';
+                const data = new Date(dataString);
+                // Verifica se a data é válida. Se não for, retorna o texto original.
+                if (isNaN(data.getTime())) {
+                    return dataString;
+                }
+                // Ajusta o fuso horário para evitar que a data mude
+                const dataAjustada = new Date(data.valueOf() + data.getTimezoneOffset() * 60000);
+                
+                const dia = String(dataAjustada.getDate()).padStart(2, '0');
+                const mes = String(dataAjustada.getMonth() + 1).padStart(2, '0');
+                const ano = String(dataAjustada.getFullYear()).slice(-2);
+                return `${dia}/${mes}/${ano}`;
+            }
+
+            // ### FUNÇÃO PARA CRIAR CRACHÁS DE STATUS ###
+            function getStatusBadge(status) {
+                if (!status) return '';
+                const statusClass = String(status).toLowerCase().replace(/\s+/g, '-') || 'default';
+                return `<span class="status-badge status-${statusClass}">${status}</span>`;
             }
             
             async function buscarDadosPorCpfCnpj(cpfCnpj) {
@@ -407,55 +462,52 @@ Se o cliente já pagou ou não contratou, resolvemos internamente (sem N2). Difi
                             if (ocorrencia.source === 'PlanilhaPrincipal') {
                                 tituloOcorrencia += " (Fonte: Reclame Aqui)";
                                 camposParaExibir = [
-                                    { rotulo: 'Id HugMe', chaveApi: 'Id HugMe' },
-                                    { rotulo: 'Origem', chaveApi: 'Origem' },
-                                    { rotulo: 'Id Origem', chaveApi: 'Id Origem' },
-                                    { rotulo: 'Data Reclamação', chaveApi: 'Data Reclamação' },
-                                    { rotulo: 'Status Hugme', chaveApi: 'Status Hugme' },
-                                    { rotulo: 'Status RA', chaveApi: 'Status RA' },
-                                    { rotulo: 'Nome', chaveApi: 'nome' },
-                                    { rotulo: 'CPF/CNPJ', chaveApi: 'CPF/CNPJ' },
-                                    { rotulo: 'Seu problema foi resolvido?', chaveApi: 'Seu problema foi resolvido?' },
-                                    { rotulo: 'Voltaria a fazer negócio?', chaveApi: 'Voltaria a fazer negócio?' },
-                                    { rotulo: 'Nota', chaveApi: 'Nota' },
-                                    { rotulo: 'Moderações neste ticket', chaveApi: 'Moderações neste ticket' },
-                                    { rotulo: 'Data de Desativação RA', chaveApi: 'Data de Desativação RA' },
-                                    { rotulo: 'Motivo de Desativação RA', chaveApi: 'Motivo de Desativação RA' },
-                                    { rotulo: 'Avaliações desconsideradas RA', chaveApi: 'Avaliações desconsideradas RA' },
-                                    { rotulo: 'Moderação status', chaveApi: 'Moderação status' },
-                                    { rotulo: 'Data Avaliacao', chaveApi: 'Data Avaliacao' }
+                                    { rotulo: 'Id HugMe', chaveApi: 'Id HugMe' }, { rotulo: 'Origem', chaveApi: 'Origem' },
+                                    { rotulo: 'Id Origem', chaveApi: 'Id Origem' }, { rotulo: 'Data Reclamação', chaveApi: 'Data Reclamação', tipo: 'data' },
+                                    { rotulo: 'Status Hugme', chaveApi: 'Status Hugme', tipo: 'status' }, { rotulo: 'Status RA', chaveApi: 'Status RA', tipo: 'status' },
+                                    { rotulo: 'Nome', chaveApi: 'nome' }, { rotulo: 'CPF/CNPJ', chaveApi: 'CPF/CNPJ' },
+                                    { rotulo: 'Seu problema foi resolvido?', chaveApi: 'Seu problema foi resolvido?' }, { rotulo: 'Voltaria a fazer negócio?', chaveApi: 'Voltaria a fazer negócio?' },
+                                    { rotulo: 'Nota', chaveApi: 'Nota' }, { rotulo: 'Moderações neste ticket', chaveApi: 'Moderações neste ticket' },
+                                    { rotulo: 'Data de Desativação RA', chaveApi: 'Data de Desativação RA', tipo: 'data' }, { rotulo: 'Motivo de Desativação RA', chaveApi: 'Motivo de Desativação RA' },
+                                    { rotulo: 'Avaliações desconsideradas RA', chaveApi: 'Avaliações desconsideradas RA' }, { rotulo: 'Moderação status', chaveApi: 'Moderação status', tipo: 'status' },
+                                    { rotulo: 'Data Avaliacao', chaveApi: 'Data Avaliacao', tipo: 'data' }
                                 ];
                             } else if (ocorrencia.source === 'PlanilhaSecundaria') {
                                 tituloOcorrencia += " (Fonte: Planilha Adicional)";
                                 camposParaExibir = [
-                                    { rotulo: 'CPF', chaveApi: 'CPF' },
-                                    { rotulo: 'ID', chaveApi: 'ID' },
-                                    { rotulo: 'Entrada', chaveApi: 'Entrada' },
-                                    { rotulo: 'Responsável', chaveApi: 'Responsável' },
-                                    { rotulo: 'Início tratativa', chaveApi: 'Início tratativa' },
-                                    { rotulo: 'Final tratativa', chaveApi: 'Final tratativa' },
-                                    { rotulo: 'Motivo reduzido', chaveApi: 'Motivo reduzido' },
-                                    { rotulo: 'Data Reclam', chaveApi: 'Data Reclam' },
-                                    { rotulo: 'Data inicial', chaveApi: 'Data inicial' },
-                                    { rotulo: 'Data final', chaveApi: 'Data final' }
+                                    { rotulo: 'CPF', chaveApi: 'CPF' }, { rotulo: 'ID', chaveApi: 'ID' },
+                                    { rotulo: 'Entrada', chaveApi: 'Entrada' }, { rotulo: 'Responsável', chaveApi: 'Responsável', tipo: 'responsavel' },
+                                    { rotulo: 'Início tratativa', chaveApi: 'Início tratativa', tipo: 'data' }, { rotulo: 'Final tratativa', chaveApi: 'Final tratativa', tipo: 'data' },
+                                    { rotulo: 'Motivo reduzido', chaveApi: 'Motivo reduzido' }, { rotulo: 'Data Reclam', chaveApi: 'Data Reclam', tipo: 'data' },
+                                    { rotulo: 'Data inicial', chaveApi: 'Data inicial', tipo: 'data' }, { rotulo: 'Data final', chaveApi: 'Data final', tipo: 'data' }
                                 ];
-                            } else {
-                                tituloOcorrencia += " (Fonte: Desconhecida)";
-                                camposParaExibir = Object.keys(ocorrencia).map(key => ({ rotulo: key, chaveApi: key }));
                             }
 
                             resultadoFinalHtml += `<hr style="border-top: 1px solid var(--cor-borda); margin: 20px 0;"><h4>${tituloOcorrencia}</h4>`;
 
-                            let listaHtml = '<ul class="response-list">';
+                            let gridHtml = '<div class="response-grid">';
                             camposParaExibir.forEach(campo => {
                                 const valor = ocorrencia[campo.chaveApi];
                                 if (valor !== undefined && valor !== null && valor !== '') {
-                                    listaHtml += `<li><strong>${campo.rotulo}:</strong> ${valor}</li>`;
+                                    let valorFormatado = valor;
+                                    // Aplica formatação com base no tipo
+                                    switch(campo.tipo) {
+                                        case 'data':
+                                            valorFormatado = formatarData(valor);
+                                            break;
+                                        case 'status':
+                                            valorFormatado = getStatusBadge(valor);
+                                            break;
+                                        case 'responsavel':
+                                            valorFormatado = `<span class="responsavel-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M20 22h-2v-2a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3v2H4v-2a5 5 0 0 1 5-5h6a5 5 0 0 1 5 5v2zm-8-9a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg> ${valor}</span>`;
+                                            break;
+                                    }
+                                    gridHtml += `<div class="grid-item"><strong class="grid-label">${campo.rotulo}</strong><span class="grid-value">${valorFormatado}</span></div>`;
                                 }
                             });
-                            listaHtml += '</ul>';
+                            gridHtml += '</div>';
                             
-                            resultadoFinalHtml += listaHtml;
+                            resultadoFinalHtml += gridHtml;
                         });
                         
                         addMessage(resultadoFinalHtml, 'bot');
@@ -486,16 +538,18 @@ Se o cliente já pagou ou não contratou, resolvemos internamente (sem N2). Difi
                     const botMsgElement = e.target.closest('.bot-msg');
                     if (botMsgElement) {
                         const titulos = botMsgElement.querySelectorAll('h4');
-                        const listas = botMsgElement.querySelectorAll('.response-list');
+                        const grids = botMsgElement.querySelectorAll('.response-grid');
                         let textToCopy = '';
 
-                        listas.forEach((lista, index) => {
+                        grids.forEach((grid, index) => {
                             if (titulos[index]) {
                                 textToCopy += titulos[index].innerText.trim() + '\n------------------------\n';
                             }
-                            const listItems = lista.querySelectorAll('li');
-                            listItems.forEach(item => {
-                                textToCopy += item.innerText.replace(':', ': ') + '\n';
+                            const items = grid.querySelectorAll('.grid-item');
+                            items.forEach(item => {
+                                const label = item.querySelector('.grid-label').innerText;
+                                const value = item.querySelector('.grid-value').innerText;
+                                textToCopy += `${label}: ${value}\n`;
                             });
                             textToCopy += '\n'; 
                         });
