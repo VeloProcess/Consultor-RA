@@ -54,7 +54,7 @@
         /* ================================================================== */
         /* ### NOVAS CORES (TEMA RECLAME AQUI) - FIM ### */
         /* ================================================================== */
-body {
+        body {
             font-family: 'Arial', sans-serif;
             color: var(--cor-texto-principal);
             display: flex;
@@ -65,14 +65,11 @@ body {
             padding: 20px;
             box-sizing: border-box;
             transition: background-color 0.3s, color 0.3s;
-
-            /* ===== ADICIONE AS LINHAS ABAIXO ===== */
             background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://github.com/VeloProcess/RA-Velobot/blob/main/Reclame-Aqui.png?raw=true');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            /* ===== FIM DAS LINHAS A ADICIONAR ===== */
         }
         .app-wrapper {
             display: grid; grid-template-columns: 300px 1fr 300px; width: 100%;
@@ -403,29 +400,51 @@ Se o cliente já pagou ou não contratou, resolvemos internamente (sem N2). Difi
                         let resultadoFinalHtml = `<strong>✅ ${data.dados.length} resultado(s) encontrado(s) para o documento:</strong>`;
 
                         data.dados.forEach((ocorrencia, index) => {
-                            resultadoFinalHtml += `<hr style="border-top: 1px solid var(--cor-borda); margin: 20px 0;"><h4>Ocorrência ${index + 1}</h4>`;
+                            
+                            let camposParaExibir;
+                            let tituloOcorrencia = `Ocorrência ${index + 1}`;
 
-                            // ### INÍCIO DA ALTERAÇÃO DOS CAMPOS ###
-                            const camposParaExibir = [
-                                { rotulo: 'Id HugMe', chaveApi: 'Id HugMe' },
-                                { rotulo: 'Origem', chaveApi: 'Origem' },
-                                { rotulo: 'Id Origem', chaveApi: 'Id Origem' },
-                                { rotulo: 'Data Reclamação', chaveApi: 'Data Reclamação' },
-                                { rotulo: 'Status Hugme', chaveApi: 'Status Hugme' },
-                                { rotulo: 'Status RA', chaveApi: 'Status RA' },
-                                { rotulo: 'Nome', chaveApi: 'nome' },
-                                { rotulo: 'CPF/CNPJ', chaveApi: 'CPF/CNPJ' },
-                                { rotulo: 'Seu problema foi resolvido?', chaveApi: 'Seu problema foi resolvido?' },
-                                { rotulo: 'Voltaria a fazer negócio?', chaveApi: 'Voltaria a fazer negócio?' },
-                                { rotulo: 'Nota', chaveApi: 'Nota' },
-                                { rotulo: 'Moderações neste ticket', chaveApi: 'Moderações neste ticket' },
-                                { rotulo: 'Data de Desativação RA', chaveApi: 'Data de Desativação RA' },
-                                { rotulo: 'Motivo de Desativação RA', chaveApi: 'Motivo de Desativação RA' },
-                                { rotulo: 'Avaliações desconsideradas RA', chaveApi: 'Avaliações desconsideradas RA' },
-                                { rotulo: 'Moderação status', chaveApi: 'Moderação status' },
-                                { rotulo: 'Data Avaliacao', chaveApi: 'Data Avaliacao' }
-                            ];
-                            // ### FIM DA ALTERAÇÃO DOS CAMPOS ###
+                            if (ocorrencia.source === 'PlanilhaPrincipal') {
+                                tituloOcorrencia += " (Fonte: Reclame Aqui)";
+                                camposParaExibir = [
+                                    { rotulo: 'Id HugMe', chaveApi: 'Id HugMe' },
+                                    { rotulo: 'Origem', chaveApi: 'Origem' },
+                                    { rotulo: 'Id Origem', chaveApi: 'Id Origem' },
+                                    { rotulo: 'Data Reclamação', chaveApi: 'Data Reclamação' },
+                                    { rotulo: 'Status Hugme', chaveApi: 'Status Hugme' },
+                                    { rotulo: 'Status RA', chaveApi: 'Status RA' },
+                                    { rotulo: 'Nome', chaveApi: 'nome' },
+                                    { rotulo: 'CPF/CNPJ', chaveApi: 'CPF/CNPJ' },
+                                    { rotulo: 'Seu problema foi resolvido?', chaveApi: 'Seu problema foi resolvido?' },
+                                    { rotulo: 'Voltaria a fazer negócio?', chaveApi: 'Voltaria a fazer negócio?' },
+                                    { rotulo: 'Nota', chaveApi: 'Nota' },
+                                    { rotulo: 'Moderações neste ticket', chaveApi: 'Moderações neste ticket' },
+                                    { rotulo: 'Data de Desativação RA', chaveApi: 'Data de Desativação RA' },
+                                    { rotulo: 'Motivo de Desativação RA', chaveApi: 'Motivo de Desativação RA' },
+                                    { rotulo: 'Avaliações desconsideradas RA', chaveApi: 'Avaliações desconsideradas RA' },
+                                    { rotulo: 'Moderação status', chaveApi: 'Moderação status' },
+                                    { rotulo: 'Data Avaliacao', chaveApi: 'Data Avaliacao' }
+                                ];
+                            } else if (ocorrencia.source === 'PlanilhaSecundaria') {
+                                tituloOcorrencia += " (Fonte: Planilha Adicional)";
+                                camposParaExibir = [
+                                    { rotulo: 'CPF', chaveApi: 'CPF' },
+                                    { rotulo: 'ID', chaveApi: 'ID' },
+                                    { rotulo: 'Entrada', chaveApi: 'Entrada' },
+                                    { rotulo: 'Responsável', chaveApi: 'Responsável' },
+                                    { rotulo: 'Início tratativa', chaveApi: 'Início tratativa' },
+                                    { rotulo: 'Final tratativa', chaveApi: 'Final tratativa' },
+                                    { rotulo: 'Motivo reduzido', chaveApi: 'Motivo reduzido' },
+                                    { rotulo: 'Data Reclam', chaveApi: 'Data Reclam' },
+                                    { rotulo: 'Data inicial', chaveApi: 'Data inicial' },
+                                    { rotulo: 'Data final', chaveApi: 'Data final' }
+                                ];
+                            } else {
+                                tituloOcorrencia += " (Fonte: Desconhecida)";
+                                camposParaExibir = Object.keys(ocorrencia).map(key => ({ rotulo: key, chaveApi: key }));
+                            }
+
+                            resultadoFinalHtml += `<hr style="border-top: 1px solid var(--cor-borda); margin: 20px 0;"><h4>${tituloOcorrencia}</h4>`;
 
                             let listaHtml = '<ul class="response-list">';
                             camposParaExibir.forEach(campo => {
